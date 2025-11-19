@@ -1,0 +1,5 @@
+Open powershell in folder
+& "C:\Users\ig-gbds\Documents\PyTorch\venv\Scripts\Activate.ps1"
+
+Run scripts in powershell:
+python src/train.py
