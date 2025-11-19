@@ -1,0 +1,16 @@
+gom-seismic/
+├── data/
+│   ├── raw/                # Your original SEGY files (Amplitudes and Labels)
+│   └── processed/          # Resulting numpy arrays or "patches" for training
+├── notebooks/
+│   ├── 01_data_exploration.ipynb   # View the seismic and check alignment
+│   └── 02_user_interface.ipynb     # The final UI you requested
+├── src/
+│   ├── __init__.py
+│   ├── data_loader.py      # Script to read SEGY and generate patches
+│   ├── preprocessing.py    # Script to normalize data (0-1 scaling) and remap labels
+│   ├── model.py            # The U-Net architecture definition
+│   └── train.py            # The training loop
+├── models/                 # Where you save your .pth (model weights) files
+├── requirements.txt        # List of libraries (segyio, torch, numpy)
+└── README.md
