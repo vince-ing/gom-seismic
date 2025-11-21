@@ -1,5 +1,12 @@
-Open powershell in folder
+Open powershell in this folder on *specific* computer
 & "C:\Users\ig-gbds\Documents\PyTorch\venv\Scripts\Activate.ps1"
 
 Run scripts in powershell:
 python src/train.py
+
+python src/train_medium.py
+
+
+To check model run
+
+python src/inference.py
