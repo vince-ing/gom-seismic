@@ -13,9 +13,9 @@ from model import UNet
 # ================= MEDIUM CONFIGURATION =================
 # Tuned for ~45-60 minutes on CPU
 BATCH_SIZE = 8          
-LEARNING_RATE = 0.0001  
-EPOCHS = 5              # Enough loops to learn basic shapes
-SAMPLE_LIMIT = 400      # 400 random patches (instead of 5000+)
+LEARNING_RATE = 0.0005  
+EPOCHS = 7              # Enough loops to learn basic shapes
+SAMPLE_LIMIT = 800      # 800 random patches (instead of 5000+)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_PATH = os.path.join(BASE_DIR, 'data', 'raw', 'CroppedData.segy')
@@ -39,7 +39,7 @@ def train_medium():
     full_dataset = SaltDataset(RAW_PATH, LABEL_PATH, MASK_PATH)
     
     # --- SUBSET STRATEGY ---
-    # Pick 400 random indices so we get a variety of salt and no-salt
+    # Pick 800 random indices so we get a variety of salt and no-salt
     # We sort them just to be tidy, though it doesn't matter for training
     all_indices = list(range(len(full_dataset)))
     random_indices = random.sample(all_indices, SAMPLE_LIMIT)
