@@ -55,7 +55,7 @@ def compute_class_weights(dataset, device):
     
     print(f"   > Pixel Counts: {class_counts.tolist()}")
     print(f"   > Calculated Weights: {weights.tolist()}")
-    print(f"   (This means the model is penalized {weights[1]:.2f}x more for missing Salt)")
+    print(f"   (Salt Weight: {weights[2]:.2f}x | Water Weight: {weights[1]:.2f}x)")
     
     return weights.to(device)
 
@@ -117,11 +117,14 @@ def train_medium():
             epoch_loss += loss.item()
             
             # --- MONITORING ---
-            # Check if the model is predicting ANY salt (Class 1)
-            # dim=1 is the channel dimension for classes
+            # Check if the model is predicting ANY salt (Class 2)
             predictions = torch.argmax(outputs, dim=1)
-            salt_pred_count = (predictions == 1).sum().item()
+            
+            # FIXED: Change == 1 to == 2 so we track SALT
+            salt_pred_count = (predictions == 2).sum().item() 
             total_salt_pixels_predicted += salt_pred_count
+            
+            loop.set_postfix(loss=loss.item(), salt_preds=salt_pred_count)
             
             loop.set_postfix(loss=loss.item(), salt_preds=salt_pred_count)
 
