@@ -17,6 +17,28 @@ MODEL_PATH = os.path.join(BASE_DIR, 'models', MODEL_NAME)
 OUTPUT_IMG = os.path.join(BASE_DIR, 'data', 'processed', 'prediction_debug.png')
 # =================================================
 
+def robust_normalize_batch(imgs):
+    """
+    MUST MATCH TRAINING EXACTLY.
+    Clips outliers and scales to [-1, 1].
+    """
+    # imgs shape: (B, C, H, W)
+    mean = imgs.mean(dim=(2, 3), keepdim=True)
+    std = imgs.std(dim=(2, 3), keepdim=True)
+    
+    # Clip at approx 2.5 std devs (covering ~98% of data)
+    lower_limit = mean - 2.5 * std
+    upper_limit = mean + 2.5 * std
+    imgs = torch.clamp(imgs, min=lower_limit, max=upper_limit)
+    
+    # Min-Max Scale the clipped data to [-1, 1]
+    min_val = imgs.amin(dim=(2, 3), keepdim=True)
+    max_val = imgs.amax(dim=(2, 3), keepdim=True)
+    
+    # Avoid division by zero
+    imgs = 2 * (imgs - min_val) / (max_val - min_val + 1e-6) - 1.0
+    return imgs
+
 def run_inference():
     print(f"{'='*40}")
     print(f"Loading Model: {MODEL_NAME}")
@@ -36,10 +58,7 @@ def run_inference():
     # Load Data (Use 1024x256 to match training)
     ds = SaltDataset(RAW_PATH, LABEL_PATH, MASK_PATH, patch_size=(1024, 256))
     
-    # 4. Setup Plot: 9 Rows x 3 Columns
-    # Col 1: Seismic
-    # Col 2: Ground Truth (Salt only)
-    # Col 3: Salt Probability (Heatmap)
+    # Setup Plot: 9 Rows x 3 Columns
     fig, axs = plt.subplots(NUM_SAMPLES, 3, figsize=(12, 4 * NUM_SAMPLES))
     plt.suptitle(f"DEBUG Analysis: {MODEL_NAME}\n(Showing Salt Probability Map)", fontsize=16)
 
@@ -56,18 +75,21 @@ def run_inference():
         attempts += 1
         idx = torch.randint(0, len(ds), (1,)).item()
         
-        # Manually grab raw data to check normalization
-        # ds[idx] returns normalized tensor. We trust the loader for now.
+        # ds[idx] returns (C, H, W)
         image, mask = ds[idx]
         
         # Check if sample has salt (Class 2)
         if np.any(mask.numpy() == 2):
             
+            # Prepare Input
+            # 1. Add Batch Dimension: (1, 1, 1024, 256)
             input_tensor = image.unsqueeze(0).to(device)
+            
+            # 2. APPLY THE FIX: Normalize exactly like training
+            input_tensor = robust_normalize_batch(input_tensor)
+            
             with torch.no_grad():
                 output = model(input_tensor) # (1, 3, H, W)
-                
-                # Get Probabilities (Softmax)
                 probs = torch.softmax(output, dim=1)
                 
                 # Extract just the SALT channel (Index 2)
@@ -76,7 +98,7 @@ def run_inference():
             # --- PLOTTING ---
             row = samples_found
             
-            # Col 1: Seismic
+            # Col 1: Seismic (Squeeze to 2D for plotting)
             axs[row, 0].imshow(image.squeeze(), cmap='gray', aspect='auto')
             axs[row, 0].set_ylabel(f"Sample {idx}", fontsize=12)
 
@@ -85,10 +107,8 @@ def run_inference():
             axs[row, 1].imshow(salt_mask, cmap='viridis', aspect='auto')
 
             # Col 3: Salt Probability Heatmap
-            # Dark Blue = 0%, Yellow = 100%
             im = axs[row, 2].imshow(salt_prob, cmap='plasma', vmin=0, vmax=1, aspect='auto')
             
-            # Add colorbar only on the first one to save space
             if row == 0:
                 plt.colorbar(im, ax=axs[row, 2], label="Salt Probability")
             
@@ -102,9 +122,6 @@ def run_inference():
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.savefig(OUTPUT_IMG)
     print(f"✅ Debug image saved to: {OUTPUT_IMG}")
-    print("Open the image. Look at Column 3.")
-    print("If Col 3 is totally black/blue, the model is dead.")
-    print("If Col 3 has faint glowing shapes, the model is trying but uncertain.")
 
 if __name__ == "__main__":
     run_inference()
