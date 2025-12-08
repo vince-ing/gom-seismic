@@ -1,2 +1,2 @@
 # gom-seismic
-Using ML to classify seismic facis in the Gulf of Mexico, especially salt and attempt to model it as 3d meshes
+Using ML to classify seismic salt bodies in the Gulf of Mexico
