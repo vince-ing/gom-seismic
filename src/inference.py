@@ -4,6 +4,8 @@ import numpy as np
 import os
 from data_loader import SaltDataset
 from model import UNet
+from skimage import morphology
+from skimage.morphology import disk
 
 # ================= CONFIGURATION =================
 MODEL_NAME = 'best_model.pth' 
@@ -94,6 +96,19 @@ def run_inference():
                 
                 # Extract just the SALT channel (Index 2)
                 salt_prob = probs[0, 2, :, :].cpu().numpy()
+
+            #Clean up
+            # 1. Threshold: Make it solid Salt (1) or Rock (0)
+            binary_mask = salt_prob > 0.5
+
+            # 2. Despeckle: Remove small yellow noise (fewer than 64 pixels)
+            clean_mask = morphology.remove_small_objects(binary_mask, min_size=64)
+
+            # 3. Fill Holes: Close small black gaps inside the salt
+            clean_mask = morphology.binary_closing(clean_mask, disk(3))
+
+            # 4. Update the variable so the plot shows the CLEAN version
+            salt_prob = clean_mask.astype(float)
 
             # --- PLOTTING ---
             row = samples_found
