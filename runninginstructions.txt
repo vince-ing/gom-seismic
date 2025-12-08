@@ -2,9 +2,10 @@ Open powershell in this folder on *specific* computer
 & "C:\Users\ig-gbds\Documents\PyTorch\venv\Scripts\Activate.ps1"
 
 Run scripts in powershell:
-python src/train.py
 
-python src/train_medium.py
+
+	(best training)
+python src/train_cached.py
 
 
 To check model run
