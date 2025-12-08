@@ -19,7 +19,7 @@ SCALE_FACTOR = 0.4  # Resample 4ms -> 10ms
 FILE_FULL_RANGE = (-12, -11912) 
 
 # --- 2. DEFINE THE CROP WINDOW ---
-CROP_WINDOW = (-12, -7000)
+CROP_WINDOW = (-12, -5500)
 
 # --- 3. TUNING CONTROLS ---
 # MODEL INPUT: Controls what the AI sees (Standard=2.5)
@@ -33,7 +33,7 @@ VISUAL_GAMMA_PROB = 0.5
 # SPECIFIC INLINES TO CHECK
 TARGETS = {
     #"G3D202407-01_lns893_1582.sgy": [1227],
-    "G3D202407-01_lns1583_2272.sgy": [1968, 1938, 1928, 1918],
+    "G3D202407-01_lns1583_2272.sgy": [1868, 1858, 1848, 1838, 1828, 1818],
     # Add more here
 }
 # ======================================================
