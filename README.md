@@ -3,6 +3,7 @@
 **Author:** Venancio Ingersoll  
 **Date:** December 2025
 
+![Seismic prediction animation](src/img/animation.gif)
 > *Above: An animation of the model's predictions moving through the seismic volume. Top: Raw Seismic + Manual Ground Truth (Gold). Bottom: Model Probability Prediction (Jet Colormap).*
 
 ---
